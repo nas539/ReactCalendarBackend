@@ -54,6 +54,14 @@ def add_month():
 
     record = Month(position, month, daysInMonth, daysInPreviousMonth, startDay, year)
     db.session.add(record)
+    db.session.commit()
+
+    return jsonify("Month added successfully")
+
+@app.route("/month/get", methods=["GET"])
+def get_all_months():
+    all_months = db.session.query(Month).all()
+    return jsonify(months_schema.dump(all_months))
 
 if __name__ == "__main__":
     app.debug = True
