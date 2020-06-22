@@ -17,7 +17,7 @@ CORS(app)
 class Month(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     position = db.Column(db.Integer, unique=True, nullable=False)
-    month = db.Column(db.String, nullable=False)
+    month = db.Column(db.String(), nullable=False)
     daysInMonth = db.Column(db.Integer, nullable=False)
     daysInPreviousMonth = db.Column(db.Integer, nullable=False)
     startDay = db.Column(db.Integer, nullable=False)
@@ -38,6 +38,22 @@ class MonthSchema(ma.Schema):
 
 month_schema = MonthSchema()
 months_schema = MonthSchema(many=True)
+
+@app.route("/month/add", methods=["POST"])
+def add_month():
+    if request.content_type != "application/json":
+        return jsonify("Error: data must be sent as JSON")
+
+    post_data = request.get_json()
+    position = post_data.get("position")
+    month = post_data.get("month")
+    daysInMonth = post_data.get("daysInMonth")
+    daysInPreviousMonth = post_data.get("daysInPreviousMonth")
+    startDay = post_data.get("startDay")
+    year = post_data.get("year")
+
+    record = Month(position, month, daysInMonth, daysInPreviousMonth, startDay, year)
+    db.session.add(record)
 
 if __name__ == "__main__":
     app.debug = True
