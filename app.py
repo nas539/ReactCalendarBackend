@@ -14,7 +14,7 @@ heroku = Heroku(app)
 CORS(app)
 
 
-class Month(bd.Model):
+class Month(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     position = db.Column(db.Integer, unique=True, nullable=False)
     month = db.Column(db.String, nullable=False)
@@ -30,6 +30,14 @@ class Month(bd.Model):
         self.daysInPreviousMonth = daysInPreviousMonth
         self.startDay = startDay
         self.year = year
+
+class MonthSchema(ma.Schema):
+    class Meta:
+        fields = ("id", "position", "month", "daysInMonth", "daysInPreviousMonth", "startDay", "year")
+
+
+month_schema = MonthSchema()
+months_schema = MonthSchema(many=True)
 
 if __name__ == "__main__":
     app.debug = True
