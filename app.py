@@ -39,6 +39,27 @@ class MonthSchema(ma.Schema):
 month_schema = MonthSchema()
 months_schema = MonthSchema(many=True)
 
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(), nullable=False)
+    date = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.String(), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, text, date, month, year):
+        self.text = text
+        self.date = date
+        self.month = month
+        self.year = year
+
+class ReminderSchema(ma.Schema):
+    class Meta:
+        fields = ("id", "text", "month", "year")
+
+reminder_schema = ReminderSchema()
+reminders_schema = ReminderSchema(many=True)
+
+
 @app.route("/month/add", methods=["POST"])
 def add_month():
     if request.content_type != "application/json":
@@ -63,6 +84,33 @@ def get_all_months():
     all_months = db.session.query(Month).all()
     return jsonify(months_schema.dump(all_months))
 
+@app.route("/reminder/add", methods=["POST"])
+def add_reminder():
+    if request.content_type != "application/json":
+        return jsonisfy("Error")
+
+    post_data = request.get_json()
+    text = post_data.get("text")
+    date = post_data.get("date")
+    month = post_data.get("month")
+    year = post_data.get("year")
+
+    record = Reminder(text, date, month, year)
+    db.session.add(record)
+    db.session.commit()
+
+    return jsonify("Reminder added successfully")
+
+@app.route("/reminder/get", methods=["GET"])
+def get_all_reminders():
+    all_reminders = db.session.query(Reminder).all()
+    return jsonify(reminders_schema.dump(all_reminders))
+
+@app.route("/reminder/get/<date>/<month>/<year>", methods=["GET"])
+def get_one_reminder(date, month, year):
+    reminder = db.session.query(Reminder).filter(Reminder.date == date).filter(Reminder.month == month).filter(Reminder.year == year).first()
+
+    return jsonify(reminder_schema.dump(reminder))
 if __name__ == "__main__":
     app.debug = True
     app.run()
